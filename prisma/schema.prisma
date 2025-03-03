@@ -1,0 +1,83 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  listings      Listing[]
+  trades        Trade[]    @relation("UserTrades")
+  messages      Message[]
+  ratings       Rating[]   @relation("UserRatings")
+  receivedRatings Rating[] @relation("ReceivedRatings")
+}
+
+model Listing {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  images      String[]
+  category    String
+  condition   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  trades      Trade[]
+}
+
+model Trade {
+  id          String   @id @default(cuid())
+  status      String   // PENDING, ACCEPTED, COMPLETED, CANCELLED
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  listingId   String
+  listing     Listing  @relation(fields: [listingId], references: [id])
+  userId      String
+  user        User     @relation("UserTrades", fields: [userId], references: [id])
+  messages    Message[]
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  content   String
+  createdAt DateTime @default(now())
+
+  // Relations
+  tradeId   String
+  trade     Trade    @relation(fields: [tradeId], references: [id])
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model Rating {
+  id        String   @id @default(cuid())
+  score     Int      // 1-5
+  comment   String?
+  createdAt DateTime @default(now())
+
+  // Relations
+  userId    String
+  user      User     @relation("UserRatings", fields: [userId], references: [id])
+  targetId  String
+  target    User     @relation("ReceivedRatings", fields: [targetId], references: [id])
+} 
