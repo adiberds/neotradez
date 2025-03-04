@@ -6,10 +6,6 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { ArrowLeftRight, Calendar, MessageSquare, Star } from "lucide-react"
-\
-export function CompletedTrades
-Calendar, MessageSquare, Star
-} from "lucide-react"
 
 export function CompletedTrades() {
   const completedTrades = [
