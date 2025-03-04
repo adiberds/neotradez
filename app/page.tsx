@@ -1,3 +1,5 @@
+"use client"
+
 import Link from "next/link"
 import { LiveTradeFeed } from "@/components/live-trade-feed"
 import { HeroSection } from "@/components/hero-section"
