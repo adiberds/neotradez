@@ -1,30 +1,41 @@
-import type { Metadata } from "next"
 import { Inter } from "next/font/google"
+import { SessionProvider } from "next-auth/react"
+import { Header } from "@/components/header"
+import { Footer } from "@/components/footer"
+import { Toaster } from "@/components/ui/toaster"
+import Script from "next/script"
 import "./globals.css"
-import { AuthProvider } from "@/components/AuthProvider"
-import Navigation from "@/components/Navigation"
 
 const inter = Inter({ subsets: ["latin"] })
 
-export const metadata: Metadata = {
-  title: "NeoTradez - Trade Items Without Money",
-  description: "A platform for trading physical items without using money, focusing on value exchange and community.",
+export const metadata = {
+  title: "NeoTradez - Trade Items with Ease",
+  description: "A modern platform for trading items with other users.",
 }
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode
-}>) {
+}) {
   return (
     <html lang="en">
+      <head>
+        <Script
+          async
+          src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${process.env.NEXT_PUBLIC_GOOGLE_ADS_CLIENT_ID}`}
+          crossOrigin="anonymous"
+        />
+      </head>
       <body className={inter.className}>
-        <AuthProvider>
-          <Navigation />
-          <main className="min-h-screen bg-background">
-            {children}
-          </main>
-        </AuthProvider>
+        <SessionProvider>
+          <div className="flex min-h-screen flex-col">
+            <Header />
+            <main className="flex-1">{children}</main>
+            <Footer />
+          </div>
+          <Toaster />
+        </SessionProvider>
       </body>
     </html>
   )
