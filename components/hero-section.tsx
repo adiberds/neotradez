@@ -5,8 +5,9 @@ import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { ArrowRight, Sparkles } from "lucide-react"
 import Image from "next/image"
+import dynamic from "next/dynamic"
 
-export function HeroSection() {
+const TiltedCards = dynamic(() => Promise.resolve(({ cards }: { cards: any[] }) => {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
 
   useEffect(() => {
@@ -19,18 +20,70 @@ export function HeroSection() {
   }, [])
 
   const calculateTilt = (index: number) => {
+    if (typeof window === 'undefined') return { x: 0, y: 0 }
     const centerX = window.innerWidth / 2
     const centerY = window.innerHeight / 2
     const deltaX = (mousePosition.x - centerX) / 50
     const deltaY = (mousePosition.y - centerY) / 50
 
-    // Add some variation based on the card index
     return {
       x: deltaX * (1 + index * 0.1),
       y: -deltaY * (1 + index * 0.1),
     }
   }
 
+  return (
+    <div className="relative h-[400px] w-full max-w-[500px]">
+      {cards.map((card, index) => (
+        <motion.div
+          key={card.id}
+          className="absolute left-0 top-0 h-[280px] w-[220px] cursor-pointer overflow-hidden rounded-xl border border-border/40 bg-background/40 p-4 backdrop-blur-md dark:border-border/20 dark:bg-[#1a1a1a]/40"
+          style={{
+            left: `${index * 40}px`,
+            top: `${index * 40}px`,
+            zIndex: cards.length - index,
+          }}
+          initial={{ opacity: 0, y: 50 }}
+          animate={{
+            opacity: 1,
+            y: 0,
+            rotateX: calculateTilt(index).y,
+            rotateY: calculateTilt(index).x,
+          }}
+          transition={{
+            duration: 0.6,
+            delay: 0.2 * index,
+            ease: "easeOut",
+          }}
+          whileHover={{
+            scale: 1.05,
+            boxShadow: "0 0 20px rgba(0, 208, 132, 0.3)",
+            transition: { duration: 0.2 },
+          }}
+        >
+          <div className="flex h-full flex-col">
+            <div className="relative mb-3 h-36 w-full overflow-hidden rounded-lg">
+              <Image
+                src={card.image || "/placeholder.svg"}
+                alt={card.title}
+                fill
+                className="object-cover transition-transform hover:scale-105"
+              />
+            </div>
+            <h3 className="text-lg font-semibold">{card.title}</h3>
+            <p className="text-sm text-muted-foreground">{card.value}</p>
+            <div className="mt-auto flex items-center gap-2 pt-2 text-xs text-muted-foreground">
+              <div className="h-5 w-5 rounded-full bg-primary/20"></div>
+              {card.owner}
+            </div>
+          </div>
+        </motion.div>
+      ))}
+    </div>
+  )
+}), { ssr: false })
+
+export function HeroSection() {
   const cards = [
     {
       id: 1,
@@ -107,53 +160,7 @@ export function HeroSection() {
         </div>
         <div className="relative flex items-center justify-center">
           <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_center,rgba(59,130,246,0.1),transparent_70%)]"></div>
-          <div className="relative h-[400px] w-full max-w-[500px]">
-            {cards.map((card, index) => (
-              <motion.div
-                key={card.id}
-                className="absolute left-0 top-0 h-[280px] w-[220px] cursor-pointer overflow-hidden rounded-xl border border-border/40 bg-background/40 p-4 backdrop-blur-md dark:border-border/20 dark:bg-[#1a1a1a]/40"
-                style={{
-                  left: `${index * 40}px`,
-                  top: `${index * 40}px`,
-                  zIndex: cards.length - index,
-                }}
-                initial={{ opacity: 0, y: 50 }}
-                animate={{
-                  opacity: 1,
-                  y: 0,
-                  rotateX: calculateTilt(index).y,
-                  rotateY: calculateTilt(index).x,
-                }}
-                transition={{
-                  duration: 0.6,
-                  delay: 0.2 * index,
-                  ease: "easeOut",
-                }}
-                whileHover={{
-                  scale: 1.05,
-                  boxShadow: "0 0 20px rgba(0, 208, 132, 0.3)",
-                  transition: { duration: 0.2 },
-                }}
-              >
-                <div className="flex h-full flex-col">
-                  <div className="relative mb-3 h-36 w-full overflow-hidden rounded-lg">
-                    <Image
-                      src={card.image || "/placeholder.svg"}
-                      alt={card.title}
-                      fill
-                      className="object-cover transition-transform hover:scale-105"
-                    />
-                  </div>
-                  <h3 className="text-lg font-semibold">{card.title}</h3>
-                  <p className="text-sm text-muted-foreground">{card.value}</p>
-                  <div className="mt-auto flex items-center gap-2 pt-2 text-xs text-muted-foreground">
-                    <div className="h-5 w-5 rounded-full bg-primary/20"></div>
-                    {card.owner}
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
+          <TiltedCards cards={cards} />
         </div>
       </div>
     </section>
